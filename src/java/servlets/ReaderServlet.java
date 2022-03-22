@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import session.BookCoverFacade;
 import session.BookFacade;
+import session.CoverFacade;
 import session.HistoryFacade;
 import session.ReaderFacade;
 import session.UserRolesFacade;
@@ -47,6 +48,7 @@ public class ReaderServlet extends HttpServlet {
     @EJB private HistoryFacade historyFacade;
     @EJB private UserRolesFacade userRolesFacade;
     @EJB private BookCoverFacade bookCoverFacade;
+    @EJB private CoverFacade coverFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -74,6 +76,7 @@ public class ReaderServlet extends HttpServlet {
             request.setAttribute("info", "У вас нет прав!");
             request.getRequestDispatcher("/showLogin").forward(request, response);
         }
+        session.setAttribute("topRole", userRolesFacade.getTopRole(authUser));
         String path = request.getServletPath();
         switch (path) {
             case "/showTakeOnBooks":
@@ -90,6 +93,14 @@ public class ReaderServlet extends HttpServlet {
             case "/takeOnBook":
                 String bookId = request.getParameter("bookId");
                 Book selectedBook = bookFacade.find(Long.parseLong(bookId));
+                List<History> historyWithReadingBooks = historyFacade.findHistoriesWithReadingBook(authUser.getReader());
+                for(History h : historyWithReadingBooks){
+                    if(h.getBook().getBookName().equals(selectedBook.getBookName())){
+                        request.setAttribute("info", "Такая книга уже выдана");
+                        request.getRequestDispatcher("/showTakeOnBooks").forward(request, response);
+                        return;
+                    }
+                }
                 selectedBook.setCount(selectedBook.getCount()-1);
                 bookFacade.edit(selectedBook);
                 History history = new History();
@@ -103,8 +114,13 @@ public class ReaderServlet extends HttpServlet {
                 break;
             case "/showReturnBook":
                 request.setAttribute("activeShowReturnBook", true);
-                List<History> historyWhisReadingBooks = historyFacade.findHistoriesWithReadingBook(authUser.getReader());
-                request.setAttribute("historyWhisReadingBooks", historyWhisReadingBooks);
+                Map<History, Cover> mapHistoryWidthReadengBook = new HashMap<>();
+                List<History> historiesWithReadingBook = historyFacade.findHistoriesWithReadingBook(authUser.getReader());
+                for (History historyWithReadingBook : historiesWithReadingBook) {
+                    BookCover bookCover = bookCoverFacade.find(historyWithReadingBook.getBook().getId());
+                    mapHistoryWidthReadengBook.put(historyWithReadingBook, bookCover.getCover());
+                }
+                request.setAttribute("mapHistoryWidthReadengBook", mapHistoryWidthReadengBook);
                 request.getRequestDispatcher("/WEB-INF/showReturnBook.jsp").forward(request, response);
                 break;
             case "/returnBook":

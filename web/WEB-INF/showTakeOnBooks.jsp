@@ -2,7 +2,7 @@
 <h1 class="w-100 text-center my-5">Список книг</h1>
 <div class="w-100 d-flex justify-content-center">
     <c:forEach var="entry" items="${mapBooks}">
-        <div class="card m-2" style="width: 10rem;">
+        <div class="card m-2" style="width: 15rem;">
             <img src="insertFile/${entry.value.fileName}" class="card-img-top" >
           <div class="card-body">
             <h5 class="card-title">${entry.key.bookName}</h5>

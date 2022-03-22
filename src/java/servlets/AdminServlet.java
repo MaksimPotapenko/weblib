@@ -6,8 +6,14 @@
 package servlets;
 
 import entity.Author;
+import entity.Cover;
+import entity.Role;
 import entity.User;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -15,21 +21,24 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import session.AuthorFacade;
+import session.RoleFacade;
+import session.UserFacade;
 import session.UserRolesFacade;
 
 /**
  *
- * @author jvm
+ * @author user
  */
-@WebServlet(name = "AuthorServlet", urlPatterns = {
-    "/addAuthor",
-    "/createAuthor",
-})
-public class AuthorServlet extends HttpServlet {
-    @EJB private AuthorFacade authorFacade;
-    @EJB private UserRolesFacade userRolesFacade;
+@WebServlet(name = "AdminServlet", urlPatterns = {
+    "/showAdminPanel",
+    "/changeRole",
     
+
+})
+public class AdminServlet extends HttpServlet {
+    @EJB private UserRolesFacade userRolesFacade;
+    @EJB private RoleFacade roleFacade;
+    @EJB private UserFacade userFacade;
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -53,47 +62,34 @@ public class AuthorServlet extends HttpServlet {
             request.setAttribute("info", "Авторизуйтесь!");
             request.getRequestDispatcher("/showLogin").forward(request, response);
         }
-        if(!userRolesFacade.isRole("MANAGER",authUser)){
+        if(!userRolesFacade.isRole("ADMINISTRATOR",authUser)){
             request.setAttribute("info", "У вас нет прав!");
             request.getRequestDispatcher("/showLogin").forward(request, response);
         }
-        session.setAttribute("topRole", userRolesFacade.getTopRole(authUser));
+        
         String path = request.getServletPath();
         switch (path) {
-            case "/addAuthor":
-                request.setAttribute("activeAddAuthor", true);
-                request.getRequestDispatcher("/WEB-INF/addAuthor.jsp").forward(request, response);
+            case "/showAdminPanel":
+                request.setAttribute("activeShowAdminPanel", true);
+                Map<User,String> mapUsers = new HashMap<>();
+                List<User> users = userFacade.findAll();
+                for(User u : users){
+                    String topRole = userRolesFacade.getTopRole(u);
+                    mapUsers.put(u, topRole);
+                }
+                request.setAttribute("mapUsers", mapUsers);
+                List<Role> roles = roleFacade.findAll();
+                request.setAttribute("roles", roles);
+                request.getRequestDispatcher("/WEB-INF/adminPanel.jsp").forward(request, response);
                 break;
-            case "/createAuthor":
-                String firstName = request.getParameter("firstName");
-                String lastName = request.getParameter("lastName");
-                String birthYear = request.getParameter("birthYear");
-                if("".equals(firstName)
-                        || lastName.isEmpty()
-                        || birthYear.isEmpty()){
-                    request.setAttribute("firtName", firstName);
-                    request.setAttribute("lastName", lastName);
-                    request.setAttribute("birthYear", birthYear);
-                    request.setAttribute("info", "Заполните все поля");
-                    request.getRequestDispatcher("/addAuthor").forward(request, response);
-                    break;
-                }
-                Author author = new Author();
-                author.setFirstName(firstName);
-                author.setLastName(lastName);
-                try {
-                    author.setBirthYear(Integer.parseInt(birthYear));
-                } catch (Exception e) {
-                    request.setAttribute("firtName", firstName);
-                    request.setAttribute("lastName", lastName);
-                    request.setAttribute("birthYear", birthYear);
-                    request.setAttribute("info", "Год рождения заполните цифрами");
-                    request.getRequestDispatcher("/addAuthor").forward(request, response);
-                    break;
-                }
-                
-                authorFacade.create(author);
-                request.getRequestDispatcher("/addAuthor").forward(request, response);
+            case "/changeRole":
+                String userId = request.getParameter("userId");
+                String roleId = request.getParameter("roleId");
+                User u = userFacade.find(Long.parseLong(userId));
+                Role r = roleFacade.find(Long.parseLong(roleId));
+                userRolesFacade.setRoleToUser(r,u);
+                request.setAttribute("info", "Роль изменена");
+                request.getRequestDispatcher("/showAdminPanel").forward(request, response);
                 break;
         }
     }

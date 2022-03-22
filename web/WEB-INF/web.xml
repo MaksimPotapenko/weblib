@@ -19,6 +19,7 @@
             <url-pattern>/WEB-INF/showTakeOnBooks.jsp</url-pattern>
             <url-pattern>/WEB-INF/showReturnBook.jsp</url-pattern>
             <url-pattern>/WEB-INF/uploadFile.jsp</url-pattern>
+            <url-pattern>/WEB-INF/adminPanel.jsp</url-pattern>
             <page-encoding>UTF-8</page-encoding>
             <include-prelude>/WEB-INF/jspf/header.jspf</include-prelude>
             <include-coda>/WEB-INF/jspf/footer.jspf</include-coda>

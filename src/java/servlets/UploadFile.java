@@ -68,6 +68,7 @@ public class UploadFile extends HttpServlet {
             request.setAttribute("info", "У вас нет прав!");
             request.getRequestDispatcher("/showLogin").forward(request, response);
         }
+        session.setAttribute("topRole", userRolesFacade.getTopRole(authUser));
         String uploadFolder = "D:\\UploadDir\\SPTV20WebLibrary";
         String path=request.getServletPath();
         switch (path) {

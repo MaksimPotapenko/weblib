@@ -57,9 +57,9 @@ public class LoginServlet extends HttpServlet {
         super.init(); //To change body of generated methods, choose Tools | Templates.
         if(userFacade.count() != 0) return;
         Reader reader = new Reader();
-        reader.setFirstname("Max");
-        reader.setLastname("Potapenko");
-        reader.setPhone("56625554");
+        reader.setFirstname("Juri");
+        reader.setLastname("Melnikov");
+        reader.setPhone("5654456767");
         readerFacade.create(reader);
         User user = new User();
         user.setLogin("admin");
@@ -81,7 +81,7 @@ public class LoginServlet extends HttpServlet {
         userRoles.setUser(user);
         userRolesFacade.create(userRoles);
         role = new Role();
-        role.setRoleName("ADMINSTRATOR");
+        role.setRoleName("ADMINISTRATOR");
         roleFacade.create(role);
         userRoles = new UserRoles();
         userRoles.setRole(role);
@@ -124,7 +124,10 @@ public class LoginServlet extends HttpServlet {
                 }
                 HttpSession session = request.getSession(true);
                 session.setAttribute("authUser", authUser);
-                request.setAttribute("info", "Здравствуйте");
+                String topRoleAuthUser = userRolesFacade.getTopRole(authUser);
+                session.setAttribute("topRole", topRoleAuthUser);
+//                request.setAttribute("topRoleAuthUser", topRoleAuthUser);
+                request.setAttribute("info", "Здравствуйте "+authUser.getReader().getFirstname());
                 request.getRequestDispatcher("/listBooks").forward(request, response);
                 break;
             case "/logout":
@@ -144,6 +147,7 @@ public class LoginServlet extends HttpServlet {
                     mapBooks.put(b, bookCover.getCover());
                 }
                 request.setAttribute("mapBooks", mapBooks);
+                request.setAttribute("activeListBooks", true);
                 request.getRequestDispatcher("/listBooks.jsp").forward(request, response);
                 break;    
             case "/showRegistration":
