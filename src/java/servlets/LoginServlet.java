@@ -57,9 +57,9 @@ public class LoginServlet extends HttpServlet {
         super.init(); //To change body of generated methods, choose Tools | Templates.
         if(userFacade.count() != 0) return;
         Reader reader = new Reader();
-        reader.setFirstname("Juri");
-        reader.setLastname("Melnikov");
-        reader.setPhone("5654456767");
+        reader.setFirstname("Max");
+        reader.setLastname("Potapenko");
+        reader.setPhone("56625554");
         readerFacade.create(reader);
         User user = new User();
         user.setLogin("admin");
@@ -127,7 +127,7 @@ public class LoginServlet extends HttpServlet {
                 String topRoleAuthUser = userRolesFacade.getTopRole(authUser);
                 session.setAttribute("topRole", topRoleAuthUser);
 //                request.setAttribute("topRoleAuthUser", topRoleAuthUser);
-                request.setAttribute("info", "Здравствуйте "+authUser.getReader().getFirstname());
+                request.setAttribute("info", "Здравствуйте");
                 request.getRequestDispatcher("/listBooks").forward(request, response);
                 break;
             case "/logout":

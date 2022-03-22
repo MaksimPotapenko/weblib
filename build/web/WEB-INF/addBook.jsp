@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <h1 class="w-100 text-center my-5">Новая книга</h1>
-<a class="w-100 text-success text-center" href="showUploadCover">Добавить новую обложку</a>
+<p class="w-100 text-center"><a class="text-info btn" href="showUploadCover">Добавить новую обложку</a></p>
 <div class="w-100 d-flex justify-content-center">
     <div class="card border-0 p-5 m-4" style="width: 30rem;">
         <form action="createBook" method="POST">
