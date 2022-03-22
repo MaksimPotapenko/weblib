@@ -29,6 +29,7 @@ import session.ReaderFacade;
 import session.RoleFacade;
 import session.UserFacade;
 import session.UserRolesFacade;
+import tools.PasswordProtected;
 
 /**
  *
@@ -63,7 +64,11 @@ public class LoginServlet extends HttpServlet {
         readerFacade.create(reader);
         User user = new User();
         user.setLogin("admin");
-        user.setPassword("12345");
+        PasswordProtected pp = new PasswordProtected();
+        String salt = pp.getSalt();
+        user.setSalt(salt);
+        String password = pp.passwordEncript("12345", salt);
+        user.setPassword(password);
         user.setReader(reader);
         userFacade.create(user);
         Role role = new Role();
@@ -118,7 +123,10 @@ public class LoginServlet extends HttpServlet {
                     request.getRequestDispatcher("/showLogin").forward(request, response);
                 }
                 //Authorization
-                if(!password.equals(authUser.getPassword())){
+                PasswordProtected pp = new PasswordProtected();
+                String salt = authUser.getSalt();
+                String sequrePassword = pp.passwordEncript(password, salt);
+                if(!sequrePassword.equals(authUser.getPassword())){
                     request.setAttribute("info", "Неверный логин или пароль");
                     request.getRequestDispatcher("/showLogin").forward(request, response);
                 }
@@ -127,7 +135,7 @@ public class LoginServlet extends HttpServlet {
                 String topRoleAuthUser = userRolesFacade.getTopRole(authUser);
                 session.setAttribute("topRole", topRoleAuthUser);
 //                request.setAttribute("topRoleAuthUser", topRoleAuthUser);
-                request.setAttribute("info", "Здравствуйте");
+                request.setAttribute("info", "Здравствуйте "+authUser.getReader().getFirstname());
                 request.getRequestDispatcher("/listBooks").forward(request, response);
                 break;
             case "/logout":
@@ -191,7 +199,11 @@ public class LoginServlet extends HttpServlet {
                 readerFacade.create(reader);
                 User user = new User();
                 user.setLogin(login);
-                user.setPassword(password1);
+                pp = new PasswordProtected();
+                salt = pp.getSalt();
+                user.setSalt(salt);
+                sequrePassword = pp.passwordEncript(password1, salt);
+                user.setPassword(sequrePassword);
                 user.setReader(reader);
                 userFacade.create(user);
                 
